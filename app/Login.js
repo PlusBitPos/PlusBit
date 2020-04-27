@@ -32,6 +32,11 @@ export default class App extends Component {
     }
 
     componentDidMount(){
+      this.refresh()
+    }
+
+    refresh = () => {
+      this.setState({loginPassword: '', loginUsername: '', registerPassword: '', registerUsername: '', confirmPassword: '', user: {}})
       RNSecureKeyStore.get("userData")
         .then((res) => {
           this.setState({user: JSON.parse(res)})
@@ -60,7 +65,7 @@ export default class App extends Component {
       Alert.alert('No account registered locally') 
       this.switchToRegister()
     } else {
-      if (this.state.loginUsername !== this.state.user.username){ Alert.alert('No user registed with that username') } else {
+      if (this.state.loginUsername !== this.state.user.username){ Alert.alert('No user registered with that username') } else {
         if (!bcrypt.compareSync(this.state.loginPassword, this.state.user.password)){ Alert.alert('Incorrect password') } else {
           this.props.dashboard()
         }
@@ -68,7 +73,7 @@ export default class App extends Component {
     }
    }
    register = () => {
-     if (this.state.registerPassword == '' || this.state.registerUsername == '' || this.state.confirmPassword == ''){ Alert.alert('Please fill out all feilds') } else {
+     if (this.state.registerPassword == '' || this.state.registerUsername == '' || this.state.confirmPassword == ''){ Alert.alert('Please fill out all fields') } else {
        if (this.state.registerPassword !== this.state.confirmPassword){ Alert.alert('Passwords do not match') } else {
         sha256(this.state.registerUsername + this.state.registerPassword).then( hash => {
           let userData = {username: this.state.registerUsername, password: bcrypt.hashSync(this.state.registerPassword, 10), biometrics: false, defaultUnit: 'coin', fiatUnit: 'USD', activeCoins: ['BTC', 'ILC'], hash: hash}
@@ -146,7 +151,7 @@ export default class App extends Component {
                         </TouchableOpacity>
                     </Card>
                     <GradientButton onPress={this.register} top={70} width={width / 1.2} title='REGISTER'/>
-                    <Text top={-20} center padding={50} color="grey">Accounts are registed locally. No account details will ever leave this device.</Text>
+                    <Text top={-20} center padding={50} color="grey">Accounts are registered locally. No account details will ever leave this device.</Text>
                 </Animated.View>
             </View>
             </ScrollView>

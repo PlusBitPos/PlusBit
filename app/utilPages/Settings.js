@@ -164,7 +164,7 @@ export default class Settings extends Component {
                       {label: 'EUR', value: 'EUR'},
                       {label: 'GBP', value: 'GBP'},
                       {label: 'HKD', value: 'HKD'},
-                      {label: 'IRN', value: 'IRN'},
+                      {label: 'INR', value: 'INR'},
                       {label: 'IDR', value: 'IDR'},
                       {label: 'JPY', value: 'JPY'},
                       {label: 'KRW', value: 'KRW'},

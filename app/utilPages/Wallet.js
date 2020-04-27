@@ -14,6 +14,7 @@ import QRCodeScanner from 'react-native-qrcode-scanner';
 import Modal from 'react-native-modal'
 import Android_QR from 'react-qr-code';
 import IOS_QR from 'react-native-qr-generator'
+import moment from 'moment'
 
 
 const width = Dimensions.get('window').width
@@ -230,8 +231,8 @@ export default class Wallet extends Component {
                                                 </View>
                                             ) : (
                                                 <View style={styles.time}>
-                                                  <Text bold>{item.date}</Text>
-                                                  <Text>{item.time}</Text>
+                                                  <Text bold>{moment(item.timestamp * 1000).format("DD/MM/YYYY")}</Text>
+                                                  <Text>{moment(item.timestamp * 1000).format('HH:mm')}</Text>
                                                 </View>
                                             )
                                         }
