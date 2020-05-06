@@ -14,6 +14,7 @@ import QRCodeScanner from 'react-native-qrcode-scanner';
 import Modal from 'react-native-modal'
 import Android_QR from 'react-qr-code';
 import IOS_QR from 'react-native-qr-generator'
+import bcrypt from 'react-native-bcrypt'
 import moment from 'moment'
 
 
@@ -41,7 +42,9 @@ export default class Wallet extends Component {
             errorIndex: '',
             sucessModal: false,
             heightList: props.props.balanceData,
-            isMax: false
+            isMax: false,
+            password: '',
+            passwordModal: false
         }
     }
 
@@ -161,6 +164,13 @@ export default class Wallet extends Component {
         } else {
             hl[this.props.props.args.name].heightList[i] = 65
             this.setState({heightList: hl})
+        }
+    }
+
+    send = () => {
+        if (!bcrypt.compareSync(this.state.password, this.props.password)) { Alert.alert('Incorrect Password') } else {
+            this.setState({passwordModal: false, password: ''})
+            this.sendTx()
         }
     }
 
@@ -331,7 +341,7 @@ export default class Wallet extends Component {
                                 </TouchableOpacity>
                             </View>
                             <Text top={20} color="grey">Fee: {this.state.fee}</Text>
-                    <GradientButton onPress={this.sendTx} title="SEND" top={30} color={this.getCoinInfo().color}/>
+                    <GradientButton onPress={() => this.setState({passwordModal: true})} title="SEND" top={30} color={this.getCoinInfo().color}/>
                     {/*<TextInput multiline style={{borderColor: 'white', borderWidth: 2, width: 200, height: 200, color: 'white'}} value={this.state.errorIndex}/>*/}
                         <Modal style={styles.modal} isVisible={this.state.qrModal} onBackdropPress={() => this.setState({qrModal: false})}>
                             <Card width={1} height={1}>
@@ -351,6 +361,13 @@ export default class Wallet extends Component {
                 <Card height={180} width={150} justifyCenter>
                     <Image style={{width: 80, height: 80}} source={require('../../assets/success.png')}/>
                     <Text bold top={20}>SUCCESS</Text>
+                </Card>
+            </Modal>
+            <Modal isVisible={this.state.passwordModal} style={styles.passwordModal} onBackdropPress={() => this.setState({passwordModal: false})} >
+                <Card justifyCenter width={width - 100} height={200}>
+                    <Text bold>ENTER PASSWORD</Text>
+                    <TextInput secureTextEntry onChangeText={(value) => this.setState({password: value})} value={this.state.password} style={styles.passwordInput}/>
+                    <GradientButton onPress={this.send} width={width - 200} height={40} top={25} title="SEND"/>
                 </Card>
             </Modal>
         </View>
@@ -457,5 +474,19 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center'
+    },
+    passwordModal: {
+        alignItems: 'center',
+        justifyContent: 'flex-start'
+    },
+    passwordInput: {
+        borderWidth: 2,
+        borderColor: 'white',
+        width: width - 200,
+        height: 40,
+        textAlign: 'center',
+        borderRadius: 5,
+        marginTop: 15,
+        color: 'white'
     }
 });

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, Dimensions, ScrollView, TouchableOpacity, Alert, Animated, Image, Clipboard, Linking, Platform, DeviceEventEmitter } from 'react-native';
+import { View, StyleSheet, Dimensions, ScrollView, TouchableOpacity, Alert, Animated, Image, Clipboard, Linking, Platform, TextInput } from 'react-native';
 import Card from '../../components/Card'
 import Text from '../../components/Text'
 import RNSecureKeyStore, {ACCESSIBLE} from "react-native-secure-key-store";
@@ -9,6 +9,8 @@ import FingerprintScanner from 'react-native-fingerprint-scanner';
 import AboutMessage from './AboutMessage'
 import DeviceInfo from 'react-native-device-info'
 import Modal from 'react-native-modal'
+import GradientButton from '../../components/GradentButton'
+import bcrypt from 'react-native-bcrypt'
 
 const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height
@@ -21,7 +23,10 @@ export default class Settings extends Component {
             privKeyHeight: new Animated.Value(90),
             showPrivKeys: false,
             user: {biometrics: false},
-            aboutModal: false
+            aboutModal: false,
+            password: '',
+            passwordModal: false,
+            privKey: 'BTC'
         }
     }
 
@@ -70,9 +75,12 @@ export default class Settings extends Component {
         }
     }
 
-    copyPrivateKey = (sym) => {
-        Clipboard.setString(this.props.props.keys[`${sym}privatekey`])
-        Alert.alert('Copied to clipboard')
+    copyPrivateKey = () => {
+        if (!bcrypt.compareSync(this.state.password, this.props.props.password)) { Alert.alert('Incorrect Password') } else {
+          this.setState({passwordModal: false, password: ''})
+          Clipboard.setString(this.props.props.keys[`${this.state.privKey}privatekey`])
+          Alert.alert(`Copied ${this.state.privKey} private key`)
+      }
     }
 
     toggleBiometrics = (res) => {
@@ -133,16 +141,16 @@ export default class Settings extends Component {
                         <View style={{alignItems: 'flex-start', width: width - 60}}>
                           <Text left={20}>Click to copy</Text>
                           <View style={styles.iconWrapper}>
-                              <TouchableOpacity onPress={() => this.copyPrivateKey('BTC')}>
+                              <TouchableOpacity onPress={() => this.setState({privKey: 'BTC', passwordModal: true})}>
                                   <Image style={styles.icon} source={require('../../assets/BTC.png')}/>
                               </TouchableOpacity>
-                              <TouchableOpacity onPress={() => this.copyPrivateKey('ILC')}>
+                              <TouchableOpacity onPress={() => this.setState({privKey: 'ILC', passwordModal: true})}>
                                   <Image style={styles.icon} source={require('../../assets/ILC.png')}/>
                               </TouchableOpacity>
-                              <TouchableOpacity onPress={() => this.copyPrivateKey('ZEL')}>
+                              <TouchableOpacity onPress={() => this.setState({privKey: 'ZEL', passwordModal: true})}>
                                   <Image style={styles.icon} source={require('../../assets/ZEL.png')}/>
                               </TouchableOpacity>
-                              <TouchableOpacity onPress={() => this.copyPrivateKey('DASH')}>
+                              <TouchableOpacity onPress={() => this.setState({privKey: 'DASH', passwordModal: true})}>
                                   <Image style={styles.icon} source={require('../../assets/DASH.png')}/>
                               </TouchableOpacity>
                           </View>
@@ -218,7 +226,7 @@ export default class Settings extends Component {
                     <TouchableOpacity onPress={() => Linking.openURL('https://discord.gg/9dXnmCz')} style={{marginLeft: 10, marginRight: 10}}>
                       <Image style={styles.socialIcon} source={require('../../assets/discord.png')}/>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => Linking.openURL('https://t.me/PlusBitPos')} style={{marginLeft: 10, marginRight: 10}}>
+                    <TouchableOpacity onPress={() => Linking.openURL('https://t.me/PlusbitWallet')} style={{marginLeft: 10, marginRight: 10}}>
                       <Image style={styles.socialIcon} source={require('../../assets/telegram.png')}/>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => Linking.openURL('https://www.instagram.com/plusbitofficial')} style={{marginLeft: 10, marginRight: 10}}>
@@ -256,6 +264,13 @@ export default class Settings extends Component {
               </ScrollView>
             </Card>
           </Modal>
+          <Modal isVisible={this.state.passwordModal} style={styles.passwordModal} onBackdropPress={() => this.setState({passwordModal: false})} >
+                <Card justifyCenter width={width - 100} height={200}>
+                    <Text bold>ENTER PASSWORD</Text>
+                    <TextInput secureTextEntry onChangeText={(value) => this.setState({password: value})} value={this.state.password} style={styles.passwordInput}/>
+                    <GradientButton onPress={this.copyPrivateKey} width={width - 200} height={40} top={25} title="SEND"/>
+                </Card>
+            </Modal>
         </View>
     )
   }
@@ -290,5 +305,19 @@ const styles = StyleSheet.create({
     modal: {
       flex: 1,
       alignItems: 'center'
-    }
+    },
+    passwordModal: {
+      alignItems: 'center',
+      justifyContent: 'flex-start'
+  },
+  passwordInput: {
+      borderWidth: 2,
+      borderColor: 'white',
+      width: width - 200,
+      height: 40,
+      textAlign: 'center',
+      borderRadius: 5,
+      marginTop: 15,
+      color: 'white'
+  }
 });

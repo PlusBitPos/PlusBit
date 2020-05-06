@@ -35,7 +35,7 @@ export default class Util extends Component {
               this.props.page == 'settings' ? (
                 <Settings props={this.props}/>
               ) : this.props.page == 'wallet' ? (
-                <Wallet ref="wallet" props={this.props}/>
+                <Wallet password={this.props.password} ref="wallet" props={this.props}/>
               ) : null
             }
          </GestureRecognizer>

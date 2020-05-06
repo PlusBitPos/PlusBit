@@ -40,7 +40,7 @@ export default class App extends Component {
       util: new Animated.Value(0),
       hashSplash: false,
       utilArg: '',
-      user: {activeCoins: [], fiatUnit: ''},
+      user: {activeCoins: [], fiatUnit: '', password: ''},
       secondaryUtilArg: '',
       keys: {},
       spinner: false,
@@ -262,6 +262,7 @@ export default class App extends Component {
             user={this.state.user}
             updateFiatUnit={(res) => this.updateFiatUnit(res)}
             balanceData={this.state.balanceData}
+            password={this.state.user.password}
           />
         </Animated.View>
       </Animated.View>
