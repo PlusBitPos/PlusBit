@@ -27,7 +27,7 @@ import Card from './components/Card'
 const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height
 
-const PLUSBIT_API_URL = 'http://localhost:3001'
+const PLUSBIT_API_URL = 'https://plusbit-api.libtechnologies.io'
 
 export default class App extends Component {
 

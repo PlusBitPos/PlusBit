@@ -226,7 +226,7 @@ export default class Settings extends Component {
                     <TouchableOpacity onPress={() => Linking.openURL('https://discord.gg/9dXnmCz')} style={{marginLeft: 10, marginRight: 10}}>
                       <Image style={styles.socialIcon} source={require('../../assets/discord.png')}/>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => Linking.openURL('https://t.me/PlusBitPos')} style={{marginLeft: 10, marginRight: 10}}>
+                    <TouchableOpacity onPress={() => Linking.openURL('https://t.me/PlusbitWallet')} style={{marginLeft: 10, marginRight: 10}}>
                       <Image style={styles.socialIcon} source={require('../../assets/telegram.png')}/>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => Linking.openURL('https://www.instagram.com/plusbitofficial')} style={{marginLeft: 10, marginRight: 10}}>
