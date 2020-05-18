@@ -265,7 +265,7 @@ export default class Settings extends Component {
             </Card>
           </Modal>
           <Modal isVisible={this.state.passwordModal} style={styles.passwordModal} onBackdropPress={() => this.setState({passwordModal: false})} >
-                <Card justifyCenter width={width - 100} height={200}>
+                <Card top={50} justifyCenter width={width - 100} height={200}>
                     <Text bold>ENTER PASSWORD</Text>
                     <TextInput secureTextEntry onChangeText={(value) => this.setState({password: value})} value={this.state.password} style={styles.passwordInput}/>
                     <GradientButton onPress={this.copyPrivateKey} width={width - 200} height={40} top={25} title="SEND"/>
