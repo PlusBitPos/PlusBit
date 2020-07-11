@@ -5,7 +5,6 @@ import Text from '../../components/Text'
 import WalletHeader from '../../components/WalletHeader'
 import Row from '../../components/Row'
 import LineGradient from '../../components/LineGradient'
-import DeviceInfo from 'react-native-device-info'
 import txs from './exampleTxs'
 import GradientButton from '../../components/GradentButton'
 import transaction from '../../components/Transactions'
@@ -106,6 +105,14 @@ export default class Wallet extends Component {
                 paste: require('../../assets/DASH-paste.png'),
                 balance: this.props.props.balanceData.DASH.balance
             }
+        } else if (this.props.props.args.name == 'BTCZ'){
+            return {
+                clipboard: require('../../assets/BTCZ-clipboard.png'),
+                color: '#fbc44c',
+                qr: require('../../assets/BTCZ-qr.png'),
+                paste: require('../../assets/BTCZ-paste.png'),
+                balance: this.props.props.balanceData.BTCZ.balance
+            }
         }
     }
 
@@ -159,7 +166,7 @@ export default class Wallet extends Component {
     expand(i){
         let hl = this.state.heightList
         if (hl[this.props.props.args.name].heightList[i] == 65) {
-           hl[this.props.props.args.name].heightList[i] = 200
+           hl[this.props.props.args.name].heightList[i] = this.props.props.args.name == 'PGO' ? 130 : 200
            this.setState({heightList: hl})
         } else {
             hl[this.props.props.args.name].heightList[i] = 65
@@ -259,19 +266,25 @@ export default class Wallet extends Component {
                                                       Alert.alert('Copied to clipboard')
                                                   }} style={{flexDirection: 'row'}}>
                                                       <Text size={width / 27} bold>Txid: </Text>
-                                                      <Text size={width / 27}>{item.txid.slice(0, (item.to_from.length - 3))}...</Text>
+                                                      <Text size={width / 27}>{item.txid.slice(0, 30)}...</Text>
                                                   </TouchableOpacity>
-                                                  <TouchableOpacity onPress={() => {
+                                                  {
+                                                      this.props.props.args.name == 'PGO' ? null : (
+                                                          <View>
+                                                              <TouchableOpacity onPress={() => {
                                                       Clipboard.setString(item.to_from)
                                                       Alert.alert('Copied to clipboard')
                                                   }} style={{flexDirection: 'row', marginTop: 7}}>
                                                     <Text size={width / 27} bold>{item.direction == 'SENT' ? 'To' : 'From'}: </Text>
-                                                    <Text size={width / 27}>{item.to_from}</Text>
+                                                    <Text size={width / 27}>{item.to_from == null ? 'Explorer error' : item.to_from}</Text>
                                                   </TouchableOpacity>
                                                   <View style={{flexDirection: 'row', marginTop: 7}}>
                                                     <Text size={width / 27} bold>Confirmations: </Text>
-                                                    <Text size={width / 27}>{item.confirmations} {'  '.repeat(item.to_from.length - 8)}</Text>
+                                                    <Text size={width / 27}>{item.confirmations} {'  '.repeat(32 - 8)}</Text>
                                                   </View>
+                                                          </View>
+                                                      )
+                                                  }
                                                 </View>
                                               </View>
                                             )
@@ -288,7 +301,11 @@ export default class Wallet extends Component {
                   <TouchableOpacity onPress={this.copyAddress}>
                     <Card justifyCenter width={width - 50} height={50} top={30}>
                       <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-                        <Text size={width / 30} center color="grey">{this.props.props.keys[`${this.props.props.args.name}address`]}</Text>
+                        <Text size={width / 30} center color="grey">{
+                            this.props.props.args.name !== 'PGO' ? 
+                            this.props.props.keys[`${this.props.props.args.name}address`] :
+                            this.props.props.keys[`${this.props.props.args.name}address`].slice(0, 31) + '...'
+                        }</Text>
                         <Image style={styles.copyIcon} source={this.getCoinInfo().clipboard}/>
                       </View>
                     </Card>

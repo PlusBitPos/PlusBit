@@ -76,7 +76,7 @@ export default class App extends Component {
      if (this.state.registerPassword == '' || this.state.registerUsername == '' || this.state.confirmPassword == ''){ Alert.alert('Please fill out all fields') } else {
        if (this.state.registerPassword !== this.state.confirmPassword){ Alert.alert('Passwords do not match') } else {
         sha256(this.state.registerUsername + this.state.registerPassword).then( hash => {
-          let userData = {username: this.state.registerUsername, password: bcrypt.hashSync(this.state.registerPassword, 10), biometrics: false, defaultUnit: 'coin', fiatUnit: 'USD', activeCoins: ['BTC', 'ILC'], hash: hash}
+          let userData = {username: this.state.registerUsername, password: bcrypt.hashSync(this.state.registerPassword, 10), biometrics: false, defaultUnit: 'coin', fiatUnit: 'USD', activeCoins: ['BTC', 'ILC'], hash: hash, activeCryptoNote: []}
           RNSecureKeyStore.set("userData", JSON.stringify(userData), {accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY})
         .then((res) => {
             this.setState({user: userData})

@@ -28,15 +28,25 @@ function getCoinData(sym, bls){
           explorer: 'https://insight.dash.org',
           network: lib.networks.dash
       }
-  }
+    } else if (sym == 'BTCZ'){
+      return {
+          balance: Number(bls.BTCZ.balance),
+          explorer: 'https://explorer.btcz.rocks',
+          network: lib.networks.zcash
+      }
+    }
 }
 
 export default function(params, cb){
+  if (params.coin == 'PGO'){
+    cb({status:2, message: 'Error sending transaction'})
+  } else {
   if (params.to == '' || params.amount <= params.fee) { cb({status: 2, message: 'Enter an address and amount greater than transaction fee'}) } else {}
     var coinData = getCoinData(params.coin, params.bls)
     if (coinData.balance < Number((params.amount + params.fee).toFixed(8))) { (cb({status: 2, message: 'Not enough funds'})) } else {
       checkAddress(params, coinData, cb)
     }
+  }
 }
 
 function checkAddress(params, coinData, cb){
@@ -79,7 +89,7 @@ function buildTransaction(params, coinData, inputs, cb){
     // init build process
     var builder = new lib.TransactionBuilder(coinData.network);
     // add coin specific paramiters
-    if (params.coin == "ZEL"){
+    if (params.coin == "ZEL" || params.coin == 'BTCZ'){
       builder.setVersion(lib.Transaction.ZCASH_SAPLING_VERSION);
       builder.setVersionGroupId(parseInt('0x892F2085', 16));
       axios.get(`${coinData.explorer}/api/status`).then(function (status) {
@@ -111,7 +121,7 @@ function signTransaction(params, coinData, inputs, builder, cb){
   try {
     var key = lib.ECPair.fromWIF(params.priv, coinData.network);
     // applying signature
-    if (params.coin == "ZEL"){
+    if (params.coin == "ZEL" || params.coin == 'BTCZ'){
       inputs.forEach((v, i) => {builder.sign(i, key, '', lib.Transaction.SIGHASH_SINGLE, inputs[i].satoshis)})
     } else {
       inputs.forEach((v, i) => {builder.sign(i, key)})

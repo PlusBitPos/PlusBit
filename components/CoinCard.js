@@ -29,6 +29,8 @@ export default class CoinCard extends Component {
       return require('../assets/ZEL.png')
     } else if (coin == 'DASH'){
       return require('../assets/DASH.png')
+    } else if (coin == 'BTCZ'){
+      return require('../assets/BTCZ.png')
     }
   }
 
@@ -57,22 +59,34 @@ export default class CoinCard extends Component {
         name: 'Dash',
         balance: this.props.balance.DASH
       }
+    } else if (coin == 'BTCZ'){
+      return {
+        gradient: ['#fbc44c', '#ffd16b'],
+        name: 'BitcoinZ',
+        balance: this.props.balance.BTCZ
+      }
     }
   }
 
   render() {
     return (
       <Animated.View style={{transform: [{translateX: this.state.animation}]}}>
-        <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={this.getCoinData(this.props.coin).gradient} style={styles.card}>
+        <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={this.getCoinData(this.props.coin).gradient} style={[styles.card, {opacity : this.props.disabledCN ? 0.6 : 1}]}>
             <Image style={styles.icon} source={this.getLogo(this.props.coin)}/>
             <View style={styles.cardInfo}>
               <Text size={20} bold>{this.getCoinData(this.props.coin).name}</Text>
-              <Text size={13}>{this.getCoinData(this.props.coin).balance.balance + ' ' + this.props.coin} | {this.getCoinData(this.props.coin).balance.fiatBalance}</Text>
+              {
+                this.props.disabledCN ? (
+                  <Text>Click to activate</Text>
+                ) : (
+                  <Text size={13}>{this.getCoinData(this.props.coin).balance.balance + ' ' + this.props.coin} | {this.getCoinData(this.props.coin).balance.fiatBalance}</Text>
+                )
+              }
             </View>
-            {<View style={{flexDirection: 'row', top: 15, justifyContent: 'center', position: 'absolute', right: 10}}>
+            <View style={{flexDirection: 'row', top: 15, justifyContent: 'center', position: 'absolute', right: 10}}>
               <Text bold size={10}>STATUS: </Text>
               <Image style={styles.statusDot} source={this.getCoinData(this.props.coin).balance.status == 2 ? require('../assets/status-2.png') : require('../assets/status-1.png')}/>
-    </View>}
+            </View>
         </LinearGradient>
       </Animated.View>
     );

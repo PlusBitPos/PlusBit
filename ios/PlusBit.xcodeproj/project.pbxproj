@@ -645,7 +645,7 @@
 			baseConfigurationReference = 3F11CCC576E4905B7810FF89 /* Pods-PlusBit.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CURRENT_PROJECT_VERSION = 72;
+				CURRENT_PROJECT_VERSION = 73;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = 83NP6XF239;
 				INFOPLIST_FILE = PlusBit/Info.plist;
@@ -666,7 +666,7 @@
 			baseConfigurationReference = E6DC1D1D3CCDD0D773C7A7B3 /* Pods-PlusBit.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CURRENT_PROJECT_VERSION = 72;
+				CURRENT_PROJECT_VERSION = 73;
 				DEVELOPMENT_TEAM = 83NP6XF239;
 				INFOPLIST_FILE = PlusBit/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

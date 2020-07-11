@@ -22,12 +22,14 @@ import Spinner from 'react-native-loading-spinner-overlay'
 import FingerprintScanner from 'react-native-fingerprint-scanner';
 import Modal from 'react-native-modal'
 import Card from './components/Card'
-
+import BalanceDefaults from './components/BalanceDefaults'
+import crypto from 'react-native-crypto'
+import { FormatBalances, CreateCryptoNoteWallet } from './components/CryptoNote';
 
 const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height
 
-const PLUSBIT_API_URL = 'https://plusbit-api.libtechnologies.io'
+const PLUSBIT_API_URL = 'https://api.plusbit.tech';
 
 export default class App extends Component {
 
@@ -40,11 +42,11 @@ export default class App extends Component {
       util: new Animated.Value(0),
       hashSplash: false,
       utilArg: '',
-      user: {activeCoins: [], fiatUnit: '', password: ''},
+      user: {activeCoins: [], fiatUnit: '', password: '', username: '', activeCryptoNote: [], hash: ''},
       secondaryUtilArg: '',
       keys: {},
       spinner: false,
-      balanceData: {totalBalance: 0.0000,BTC:{balance: 0.00000000,fiatBalance: 0.00,transactions:[], status:2},ILC:{balance:0.00000000,fiatBalance:0.000,transactions:[],status:2},ZEL:{balance:0.00000000,fiatBalance:0.000,transactions:[],status:2},DASH:{balance:0.00000000,fiatBalance:0.00,transactions:[],status:2}},
+      balanceData: BalanceDefaults,
       status: true,
       modal: false
     }
@@ -52,6 +54,13 @@ export default class App extends Component {
   componentDidMount(){
     RNSecureKeyStore.get("userData").then((res) => {
       let json = JSON.parse(res)
+      if (json.activeCryptoNote == undefined) {
+        json.activeCryptoNote = []
+        RNSecureKeyStore.set("userData", JSON.stringify(json), {accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY})
+        .then((res) => {
+            this.setState({user: json})
+        })
+      }
       if (json.biometrics){
         if (Platform.OS == 'ios'){
           this.iosBiometricAuthentication()
@@ -168,17 +177,23 @@ export default class App extends Component {
     }, 1000)
   }
 
+  encryptString = (text) => {
+    var cipher = crypto.createCipher('aes-256-ctr', 'bylibtech')
+    var crypted = cipher.update(text,'utf8','hex')
+    crypted += cipher.final('hex');
+    return crypted;
+  }
+
   updateUser = () => {
     RNSecureKeyStore.get("userData").then((res) => {
       let json = JSON.parse(res)
-      console.log(json)
       let keys = Keys(json.hash)
       this.setState({user: json, keys: keys, spinner: true})
       setInterval(() => {
         this.updateRemoteData()
       }, 30000)
-      console.log(`${PLUSBIT_API_URL}/plusbit/${json.fiatUnit}/${keys.BTCaddress}/${keys.ILCaddress}/${keys.ZELaddress}/${keys.DASHaddress}`)
-      return fetch(`${PLUSBIT_API_URL}/plusbit/${json.fiatUnit}/${keys.BTCaddress}/${keys.ILCaddress}/${keys.ZELaddress}/${keys.DASHaddress}`)
+      console.log(`${PLUSBIT_API_URL}/plusbit/${json.fiatUnit}/${keys.BTCaddress}/${keys.ILCaddress}/${keys.ZELaddress}/${keys.DASHaddress}/${keys.BTCZaddress}`)
+      return fetch(`${PLUSBIT_API_URL}/plusbit/${json.fiatUnit}/${keys.BTCaddress}/${keys.ILCaddress}/${keys.ZELaddress}/${keys.DASHaddress}/${keys.BTCZaddress}`)
       .then((response) => response.json())
       .then((responseJson) => {
         this.setState({balanceData: responseJson, spinner: false, status: true})
@@ -194,7 +209,7 @@ export default class App extends Component {
   } 
 
   updateRemoteData(){
-    return fetch(`${PLUSBIT_API_URL}/plusbit/${this.state.user.fiatUnit}/${this.state.keys.BTCaddress}/${this.state.keys.ILCaddress}/${this.state.keys.ZELaddress}/${this.state.keys.DASHaddress}`)
+    return fetch(`${PLUSBIT_API_URL}/plusbit/${this.state.user.fiatUnit}/${this.state.keys.BTCaddress}/${this.state.keys.ILCaddress}/${this.state.keys.ZELaddress}/${this.state.keys.DASHaddress}/${this.state.keys.BTCZaddress}`)
       .then((response) => response.json())
       .then((responseJson) => {
         console.log('Updating wallet data')
@@ -230,6 +245,55 @@ export default class App extends Component {
         })
   }
 
+  activateCryptoNoteAsset = (asset, cb) => {
+    //this.setState({spinner: true})
+    fetch(`http://45.76.43.226:3001/get/cf97f6ceb44ba9365cf05a713daab4d013173/${crypto.createHash("sha256").update(this.state.user.username).digest('hex')}`).then((response) => response.json()).then((responseJson) => {
+      CreateCryptoNoteWallet(this.state.user.username, this.state.user.password, this.state.keys[`${asset}privatekey`], Number(responseJson), function (response) {
+        //console.log(response)
+      })
+    }).catch((error) => {
+      //this.setState({spinner: false})
+      cb(false)
+    })
+    /*this.setState({spinner: true});
+    var self = this;
+    fetch(`http://45.76.43.226:8979/wallet/import/key`, {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json', "X-API-KEY" : 'pengolincoinpassword' },
+      body: JSON.stringify({
+          "daemonHost": "127.0.0.1",
+          "daemonPort": 11898,
+          "filename": `${this.encryptString(this.state.user.username)}.wallet`,
+          "password": this.encryptString(this.state.user.hash),
+          "scanHeight": 0,
+          "privateViewKey": this.state.keys[`${asset}privatekey`].viewprivatekey,
+          "privateSpendKey": this.state.keys[`${asset}privatekey`].spendprivatekey
+        })
+    })
+      .then((response) => {
+        if (response.status !== 200) {
+          self.setState({spinner: false})
+          cb(false);
+        } else {
+          fetch('http://45.76.43.226:8979/wallet', {
+            method: 'delete',
+            headers: { 'Content-Type': 'application/json', "X-API-KEY": "pengolincoinpassword" },
+          }).then(res => {
+            if (res.status == 200) {
+              self.setState({spinner: false})
+              cb(true)
+            } else {
+              self.setState({spinner: false})
+              cb(false)
+            }
+          })
+        }
+      }).catch((error) => {
+        self.setState({spinner: false})
+        cb(false)
+      })*/
+  }
+
   render() {
     return (
       <View style={{backgroundColor: '#222222'}}>
@@ -250,6 +314,7 @@ export default class App extends Component {
             updateUser={() => this.updateUser()}
             status={this.state.status}
             balanceData={this.state.balanceData}
+            activateCryptoNoteAsset={(asset, cb) => this.activateCryptoNoteAsset(asset, cb)}
           />
         </Animated.View>
         <Animated.View style={{transform: [{translateX: this.state.util}]}}>

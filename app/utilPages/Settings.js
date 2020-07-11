@@ -78,7 +78,11 @@ export default class Settings extends Component {
     copyPrivateKey = () => {
         if (!bcrypt.compareSync(this.state.password, this.props.props.password)) { Alert.alert('Incorrect Password') } else {
           this.setState({passwordModal: false, password: ''})
-          Clipboard.setString(this.props.props.keys[`${this.state.privKey}privatekey`])
+          if (this.state.privKey == 'PGO') {
+            Clipboard.setString('View Private Key: ' + this.props.props.keys[`${this.state.privKey}privatekey`].viewprivatekey + '; Spend Private Key: ' + this.props.props.keys[`${this.state.privKey}privatekey`].spendprivatekey)
+          } else {
+            Clipboard.setString(this.props.props.keys[`${this.state.privKey}privatekey`])
+          }
           Alert.alert(`Copied ${this.state.privKey} private key`)
       }
     }
@@ -152,6 +156,9 @@ export default class Settings extends Component {
                               </TouchableOpacity>
                               <TouchableOpacity onPress={() => this.setState({privKey: 'DASH', passwordModal: true})}>
                                   <Image style={styles.icon} source={require('../../assets/DASH.png')}/>
+                              </TouchableOpacity>
+                              <TouchableOpacity onPress={() => this.setState({privKey: 'BTCZ', passwordModal: true})}>
+                                  <Image style={styles.icon} source={require('../../assets/BTCZ.png')}/>
                               </TouchableOpacity>
                           </View>
                         </View>
@@ -241,15 +248,11 @@ export default class Settings extends Component {
                   <TouchableOpacity onPress={() => Linking.openURL('https://github.com/PlusBitPos/PrivacyPolicy')}><Text color='#00cbb3' size={12}>Privacy Policy </Text></TouchableOpacity>
                   </View>
                 </Card>
-                <Card bottom={Platform.OS == 'ios' ? 30 : 80} top={30} width={width - 50} height={102}>
+                <Card bottom={Platform.OS == 'ios' ? 30 : 80} top={30} width={width - 50} height={75}>
                   <View style={{flexDirection: 'row', marginTop: 12}}>
                   <Text size={12}>From </Text>
                   <TouchableOpacity onPress={() => Linking.openURL('https://plusbit.tech')}><Text color='#00cbb3' size={12}>PlusBit </Text></TouchableOpacity>
                   <Text size={12}>© 2020 All rights reserved</Text>
-                  </View>
-                  <View style={{flexDirection: 'row', marginTop: 10}}>
-                  <Text size={12}>Created by </Text>
-                  <TouchableOpacity onPress={() => Linking.openURL('https://libtechnologies.io')}><Text color='#00cbb3' size={12}>L.I.B. Technologies </Text></TouchableOpacity>
                   </View>
                   <View style={{flexDirection: 'row', marginTop: 10}}>
                   <Text size={12}>Powered by </Text>
@@ -268,7 +271,7 @@ export default class Settings extends Component {
                 <Card top={50} justifyCenter width={width - 100} height={200}>
                     <Text bold>ENTER PASSWORD</Text>
                     <TextInput secureTextEntry onChangeText={(value) => this.setState({password: value})} value={this.state.password} style={styles.passwordInput}/>
-                    <GradientButton onPress={this.copyPrivateKey} width={width - 200} height={40} top={25} title="SEND"/>
+                    <GradientButton onPress={this.copyPrivateKey} width={width - 200} height={40} top={25} title="REVEAL"/>
                 </Card>
             </Modal>
         </View>

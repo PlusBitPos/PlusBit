@@ -22,6 +22,8 @@ export default class CoinCard extends Component {
       return require('../assets/ZEL.png')
     } else if (coin == 'DASH'){
       return require('../assets/DASH.png')
+    } else if (coin == 'BTCZ'){
+      return require('../assets/BTCZ.png')
     }
   }
 
@@ -30,13 +32,13 @@ export default class CoinCard extends Component {
     if (coin == 'BTC'){
       return {
         gradient: ['rgb(233, 122, 22)', 'rgb(247, 156, 74)'],
-        name: 'Bitcoin',
+        name: 'BTC',
         balance: this.props.balance.BTC
       }
     } else if (coin == 'ILC'){
       return {
         gradient: ['rgb(19, 64, 115)', 'rgb(23, 142, 159)'],
-        name: 'ILCoin',
+        name: 'ILC',
         balance: this.props.balance.ILC
       }
     } else if (coin == 'ZEL'){
@@ -48,8 +50,14 @@ export default class CoinCard extends Component {
     } else if (coin == 'DASH'){
       return {
         gradient: ['rgb(14, 119, 221)', '#61a3fa'],
-        name: 'Dash',
+        name: 'DASH',
         balance: this.props.balance.DASH
+      }
+    } else if (coin == 'BTCZ'){
+      return {
+        gradient: ['#fbc44c', '#ffd16b'],
+        name: 'BTCZ',
+        balance: this.props.balance.BTCZ
       }
     }
   }

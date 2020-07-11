@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient'
 import Text from '../components/Text'
 import Row from '../components/Row'
@@ -8,6 +8,7 @@ import DeviceInfo from 'react-native-device-info'
 import Modal from 'react-native-modal'
 import Card from '../components/Card'
 import RNSecureKeyStore, {ACCESSIBLE} from "react-native-secure-key-store";
+import GradentButton from '../components/GradentButton';
 
 const height = Dimensions.get('window').height
 const width = Dimensions.get('window').width
@@ -18,7 +19,9 @@ export default class Dashboard extends Component {
     super()
     this.state = {
       addModal: false,
-      removeModal: false
+      removeModal: false,
+      cryptoNoteWarning: false,
+      cryptoNoteWarningAsset: ''
     }
   }
 
@@ -45,6 +48,40 @@ export default class Dashboard extends Component {
         });
   }
 
+  getDisabledCryptoNoteAsset = (asset) => {
+    if (asset == 'PGO') {
+      if (this.props.user.activeCryptoNote.indexOf(asset) == -1){
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  activateCryptoNoteAsset = () => {
+    let self = this
+    this.props.activateCryptoNoteAsset(this.state.cryptoNoteWarningAsset, function(response) {
+      self.setState({cryptoNoteWarning: false})
+      if (!response) {
+        self.setState({cryptoNoteWarningAsset: ''})
+        setTimeout(() => {
+          Alert.alert("Error", "There was an error activating wallet. If this problem persists contact support")
+        }, 200)
+      } else {
+        self.props.user.activeCryptoNote.push(self.state.cryptoNoteWarningAsset)
+        RNSecureKeyStore.set("userData", JSON.stringify(self.props.user), {accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY})
+        .then((res) => {
+          self.setState({cryptoNoteWarningAsset: ''})
+          self.props.updateUser()
+        }, (err) => {
+            Alert.alert('There was an error updating user state')
+        });
+      }
+    })
+  }
+
   render () {
     return (
         <View style={styles.background}>
@@ -60,8 +97,8 @@ export default class Dashboard extends Component {
           <ScrollView style={{width: Dimensions.get('window').width, marginBottom: 70}} contentContainerStyle={{alignItems: 'center'}}>
           {
             this.props.user.activeCoins.map((item, index) => (
-              <TouchableOpacity onPress={() => this.props.util('wallet', {name: item})} style={styles.coinWrapper}>
-                 <CoinCard balance={this.props.balanceData} status={this.props.status} unit={this.props.user.fiatUnit} coin={item}/>
+              <TouchableOpacity onPress={() => this.getDisabledCryptoNoteAsset(item) ? this.setState({cryptoNoteWarning: true, cryptoNoteWarningAsset: item}) : this.props.util('wallet', {name: item})} style={styles.coinWrapper}>
+                 <CoinCard disabledCN={this.getDisabledCryptoNoteAsset(item)} balance={this.props.balanceData} status={this.props.status} unit={this.props.user.fiatUnit} coin={item}/>
               </TouchableOpacity>
             ))
           }
@@ -84,7 +121,7 @@ export default class Dashboard extends Component {
           </View>
 
           <Modal style={styles.modal} isVisible={this.state.addModal} onBackdropPress={() => this.setState({addModal: false})}>
-            <Card width={200} height={300}>
+            <Card width={200} height={400}>
               <Text bold size={20} top={20}>Add an asset</Text>
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <TouchableOpacity onPress={() => this.addAsset('BTC')} disabled={this.props.user.activeCoins.indexOf('BTC') == -1 ? false : true} style={[{alignItems: 'center'}, this.props.user.activeCoins.indexOf('BTC') == -1 ? null : {opacity: 0.5}]}>
@@ -106,11 +143,17 @@ export default class Dashboard extends Component {
                   <Text>Dash</Text>
                 </TouchableOpacity>
               </View>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <TouchableOpacity onPress={() => this.addAsset('BTCZ')} disabled={this.props.user.activeCoins.indexOf('BTCZ') == -1 ? false : true} style={[{alignItems: 'center'}, this.props.user.activeCoins.indexOf('BTCZ') == -1 ? null : {opacity: 0.5}]}>
+                  <Image style={styles.addIcon} source={require('../assets/BTCZ.png')}/>
+                  <Text>BitcoinZ</Text>
+                </TouchableOpacity>
+              </View>
             </Card>
           </Modal>
 
           <Modal style={styles.modal} isVisible={this.state.removeModal} onBackdropPress={() => this.setState({removeModal: false})}>
-            <Card width={200} height={300}>
+            <Card width={200} height={400}>
               <Text bold size={20} top={20}>Remove an asset</Text>
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <TouchableOpacity onPress={() => this.removeAsset('BTC')} disabled={this.props.user.activeCoins.indexOf('BTC') == -1 ? true : false} style={[{alignItems: 'center'}, this.props.user.activeCoins.indexOf('BTC') == -1 ? {opacity: 0.5} : null]}>
@@ -132,6 +175,20 @@ export default class Dashboard extends Component {
                   <Text>Dash</Text>
                 </TouchableOpacity>
               </View>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <TouchableOpacity onPress={() => this.removeAsset('BTCZ')} disabled={this.props.user.activeCoins.indexOf('BTCZ') == -1 ? true : false} style={[{alignItems: 'center'}, this.props.user.activeCoins.indexOf('BTCZ') == -1 ? {opacity: 0.5} : null]}>
+                  <Image style={styles.addIcon} source={require('../assets/BTCZ.png')}/>
+                  <Text>BitcoinZ</Text>
+                </TouchableOpacity>
+              </View>
+            </Card>
+          </Modal>
+
+          <Modal style={styles.modal} isVisible={this.state.cryptoNoteWarning} onBackdropPress={() => this.setState({cryptoNoteWarning: false, cryptoNoteWarningAsset: ''})}>
+            <Card width={250} height={200}>
+              <Text size={20} top={20} bold>WARNING</Text>
+              <Text size={12} center top={5}>Only activate PengolinCoin if you are planning to use it as this will initialize a sync.</Text>
+              <GradentButton onPress={() => this.activateCryptoNoteAsset()} title="ACTIVATE" width={200} height={35} top={20}/>
             </Card>
           </Modal>
         </View>
@@ -234,5 +291,5 @@ const styles = StyleSheet.create({
     },
     navIconWrapper: {
       alignItems: 'center'
-    }
+    },
 })
